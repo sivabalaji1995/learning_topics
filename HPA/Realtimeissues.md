@@ -10,13 +10,7 @@ Metrics Server provides 15-60 second old data, but your traffic changes in milli
 
 Real Example:
 
-text
-12:00:00 - Traffic spikes to 10,000 RPS
-12:00:05 - Metrics Server reports "we're at 5,000 RPS" (lagging)
-12:00:05 - HPA calculates: need 5 pods (but actually need 10)
-12:00:30 - Finally sees 10,000 RPS, now needs 10 pods
-12:01:30 - New pods are running (90 seconds later)
-12:02:00 - Traffic drops to 1,000 RPS (already missed the spike)
+
 
 
 # 1. Reduce metric collection interval (modify metrics-server)
