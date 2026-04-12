@@ -102,3 +102,7 @@ Step 7: HPA SCALING LOOP (What happens at runtime)
 - [ ] 7. Verify custom metrics API is available (kubectl api-versions | grep custom.metrics)
 - [ ] 8. Create HPA targeting your deployment with metric name http_requests_per_second
 - [ ] 9. Monitor HPA with kubectl get hpa --watch
+
+
+
+
