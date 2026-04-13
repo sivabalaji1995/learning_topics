@@ -136,6 +136,12 @@ spec:
 
 At the end , create the keda object called Scaledobject which is maintained by keda operator and it will take care of scaling the pods by getting the metrics from prometheis directly by passing the adpater and k8s metrics. 
 
+![sclaedobject](image-1.png)
+
+It will create the HPA object in the backend 
+
+![KEDA HPA object](image-2.png)
+
 ``` keda.yaml
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
@@ -160,3 +166,5 @@ spec:
 ```
 
 In this way, you can use keda to scale the pods based on different aspects.
+
+
