@@ -1,27 +1,39 @@
-Keda is the Kubernetes Event Driven Autoscaler. 
+# KEDA-Based Autoscaling with Prometheus
 
-You can install the KEDA using the HELM charts. please find below 
+## 📌 Overview
 
-```
+KEDA (Kubernetes Event-Driven Autoscaler) is a lightweight component that enables event-driven autoscaling in Kubernetes. It allows you to scale applications based on external metrics such as Prometheus, Kafka, RabbitMQ, and more.
+
+In this setup, we use Prometheus metrics to scale an NGINX deployment using KEDA.
+
+---
+
+## 🚀 Install KEDA
+
+You can install KEDA using Helm:
+
+```bash
 helm repo add kedacore https://kedacore.github.io/charts
 helm repo update
 
 helm install keda kedacore/keda --namespace keda --create-namespace
 ```
 
-you can get pods and all other objects in keda namespace using below.
+Verify installation:
 
-```
+```bash
 kubectl get all -n keda
 ```
 
+---
 
-![keda objects](image.png)
+## 🧱 Step 1: Create NGINX Deployment with Metrics Exporter
 
-Inorder to implement it, first create the deployment using nginx pod. Try to create a sidecar container that scrapes the metrics and make it available at /metrics on container port 9113.
+We deploy an NGINX application along with a sidecar container that exposes metrics in Prometheus format.
 
-```configmap.yaml
+### ConfigMap
 
+```yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -40,12 +52,14 @@ data:
             stub_status;
             allow all;
         }
-
     }
-
 ```
 
-``` deployment.yaml
+---
+
+### Deployment + Service
+
+```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -75,7 +89,7 @@ spec:
           requests:
             cpu: "250m"
             memory: "128Mi"
-      
+
       - name: nginx-prometheus-exporter
         image: nginx/nginx-prometheus-exporter:latest
         args:
@@ -87,7 +101,6 @@ spec:
       - name: nginx-config-volume
         configMap:
           name: nginx-config
-        
 
 ---
 apiVersion: v1
@@ -109,12 +122,15 @@ spec:
     targetPort: 9113
     name: metrics
   type: ClusterIP
-
 ```
 
-Create a service monitor so that prometheus can able to find the nginx pods and scrape the metrics. 
+---
 
-``` servicemonitor.yaml
+## 📊 Step 2: Configure ServiceMonitor
+
+A ServiceMonitor allows Prometheus to discover and scrape metrics from the NGINX pods.
+
+```yaml
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -127,22 +143,20 @@ spec:
       app: nginx
   endpoints:
   - port: metrics
-    interval: 15s 
+    interval: 15s
     path: /metrics
   namespaceSelector:
     matchNames:
     - default
 ```
 
-At the end , create the keda object called Scaledobject which is maintained by keda operator and it will take care of scaling the pods by getting the metrics from prometheis directly by passing the adpater and k8s metrics. 
+---
 
-![sclaedobject](image-1.png)
+## ⚡ Step 3: Create KEDA ScaledObject
 
-It will create the HPA object in the backend 
+The ScaledObject is the core KEDA resource that defines how your application should scale.
 
-![KEDA HPA object](image-2.png)
-
-``` keda.yaml
+```yaml
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
@@ -150,10 +164,13 @@ metadata:
 spec:
   scaleTargetRef:
     name: nginx
+
   minReplicaCount: 1
   maxReplicaCount: 10
+
   pollingInterval: 15
   cooldownPeriod: 30
+
   triggers:
   - type: prometheus
     metadata:
@@ -162,9 +179,32 @@ spec:
       threshold: "80"
       query: |
         sum(rate(nginx_http_requests_total{namespace!="",pod!=""}[1m])) by (pod)
-      
 ```
 
-In this way, you can use keda to scale the pods based on different aspects.
+---
 
+## 🔄 How It Works
 
+1. NGINX exposes basic stats using `stub_status`.
+2. The sidecar exporter converts these stats into Prometheus metrics.
+3. Prometheus scrapes the metrics using the ServiceMonitor.
+4. KEDA queries Prometheus at regular intervals.
+5. Based on the defined threshold, KEDA scales the deployment.
+6. KEDA automatically creates and manages an HPA (Horizontal Pod Autoscaler).
+
+---
+
+## ✅ Key Benefits of KEDA
+
+* No need for Prometheus Adapter
+* Simplified autoscaling configuration
+* Supports multiple event sources
+* Automatically manages HPA
+
+---
+
+## 🎯 Conclusion
+
+KEDA simplifies autoscaling by directly integrating with Prometheus and other event sources. By using ScaledObjects, you can define flexible and powerful scaling rules without the complexity of custom metrics adapters.
+
+This approach is more efficient, easier to manage, and closer to real-world production use cases compared to traditional HPA setups.
