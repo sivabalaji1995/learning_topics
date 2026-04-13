@@ -103,7 +103,7 @@ spec:
 
 Now check if the metrics is available at http://localhost:9113/metrcis
 
-![alt text](image-1.png)
+![alt text](images/image-1.png)
 
 it should show something like this with nginx_up 1 which says it is able to get the metrics from nginx container and make it available at /metrics endpoint on port 9113
 
@@ -133,13 +133,13 @@ spec:
 
 - Here the prometheus operator uses certain lables to match the service minitor to reach out to the pods to scrape the metrics. so make sure tp have that lable put in the service minitor. 
 
-![prometheus operator](image-4.png)
+![prometheus operator](images/image-4.png)
 
 Inorder to check if it is working oir not , check if service minitor is listing out in promethues ui targets and see if you can see the nginx_http_requests_total query .
 
-![alt text](image-2.png)
+![alt text](images/image-2.png)
 
-![alt text](image-3.png)
+![alt text](images/image-3.png)
 
 now we have completed the half of the work flow. below are the ponrts.
 
@@ -186,7 +186,7 @@ if it is showing inside the resources blok as empty then adpater is not getting 
 
 One way to check is to see of adapter is checking the right proetheus address.
 
-![prometheus url in adapater config](image-5.png)
+![prometheus url in adapater config](images/image-5.png)
 
 ```
 k logs -n monitoring pods/prometheus-adapter-54cfc87989-x8vx
@@ -225,4 +225,4 @@ Check the HPA status using below
 k get hpa -w
 ```
 
-![HPA status](image-6.png)
+![HPA status](images/image-6.png)
