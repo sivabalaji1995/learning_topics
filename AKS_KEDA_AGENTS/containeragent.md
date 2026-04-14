@@ -144,7 +144,7 @@ ENTRYPOINT [ "./start.sh" ]
 By running the below command, you can start the container, you need to send the env variable like ORGANOSATION , PAT TOKEN, and AGENT_POOK name so start.sh can run and shown as online in the devops portal.
 
 ```
-ocker run -d -t -e AZP_URL=https://dev.azure.com/sivabalaji280 \
+docker run -d -t -e AZP_URL=https://dev.azure.com/sivabalaji280 \
            -e AZP_TOKEN=2roh3mtRfY1pUw1Ek23g83PYFq10Wbyfn1J2GHXNNk2bllJdYYY1JQQJ99CDACAAAAAAAAAAAAASAZDO3dgF \
            -e AZP_POOL=containerized_pool \
            --name azp-agent \
